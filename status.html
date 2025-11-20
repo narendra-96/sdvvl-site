@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SDVVL Enquiry Status</title>
+<style>
+body {font-family:Arial;margin:20px;background:#eef1f7;}
+table{width:100%;border-collapse:collapse;background:white;}
+th,td{padding:10px;border:1px solid #ddd;}
+input,select{padding:8px;margin:5px;}
+button{padding:8px 14px;background:#002d62;color:white;border:0;border-radius:6px;}
+</style>
+</head>
+
+<body>
+<h1>Enquiry Status</h1>
+
+<h3>Track Your Request</h3>
+<input id="track" placeholder="Enter Tracking ID">
+<button onclick="track()">Check</button>
+
+<p id="trackResult"></p>
+
+<hr>
+
+<h2>Admin Panel</h2>
+<p>Open with:  <b>?key=admin123</b></p>
+
+<div id="adminTable">Loading...</div>
+
+<script>
+const key = new URLSearchParams(window.location.search).get('key') || '';
+
+load();
+
+async function load(){
+    const res = await fetch('/api/enquiries');
+    const data = await res.json();
+    render(data);
+}
+
+function render(data){
+    let html = "<table><tr><th>ID</th><th>Name</th><th>Phone/Email</th><th>Message</th><th>Status</th><th>Action</th></tr>";
+
+    data.forEach(x=>{
+        html += `<tr>
+            <td>${x.id}</td>
+            <td>${x.name}</td>
+            <td>${x.phone || x.email}</td>
+            <td>${x.message}</td>
+            <td>${x.status}</td>
+            <td>
+                ${ key ? `
+                    <select id="s${x.id}">
+                        <option>Pending</option>
+                        <option>In Progress</option>
+                        <option>Completed</option>
+                    </select>
+                    <button onclick="update(${x.id})">Save</button>
+                ` : 'Login required'}
+            </td>
+        </tr>`;
+    });
+
+    html += "</table>";
+    document.getElementById("adminTable").innerHTML = html;
+}
+
+async function update(id){
+    const status = document.getElementById("s"+id).value;
+    const res = await fetch('/api/update-status',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id,status,key})
+    });
+
+    const j = await res.json();
+    if(j.ok){ alert("Updated"); load(); }
+}
+
+async function track(){
+    const id = document.getElementById("track").value;
+    const res = await fetch('/api/enquiry/'+id);
+    const j = await res.json();
+    document.getElementById("trackResult").innerText =
+        j.error ? "Not found" : "Status: "+j.status;
+}
+</script>
+
+</body>
+</html>

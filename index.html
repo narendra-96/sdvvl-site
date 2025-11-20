@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SDVVL Survey & Construction</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#f5f6fa;}
+        header{background:#002d62;color:white;padding:20px;text-align:center;}
+        .container{padding:20px;}
+        .card{background:white;margin:20px auto;padding:20px;max-width:600px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+        input,select,textarea{width:100%;padding:12px;margin-top:10px;border:1px solid #ddd;border-radius:5px;}
+        button{padding:12px 20px;background:#002d62;color:white;border:0;border-radius:5px;margin-top:10px;cursor:pointer;}
+        button:hover{background:#003c85;}
+        #formMsg{margin-top:10px;color:green;font-weight:bold;}
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SDVVL Survey & Construction</h1>
+</header>
+
+<div class="container">
+
+    <!-- Quick Enquiry -->
+    <div class="card">
+        <h2>Quick Enquiry</h2>
+        <form onsubmit="return handleQuick(event)">
+            <input type="text" id="qName" placeholder="Your Name" required>
+            <input type="text" id="qPhone" placeholder="Phone Number" required>
+            <select id="qType">
+                <option>Select Service</option>
+                <option>Land Survey</option>
+                <option>Construction</option>
+                <option>Layout Marking</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="card">
+        <h2>Contact Us</h2>
+        <form onsubmit="return handleContact(event)">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Email">
+            <input type="text" id="phone" placeholder="Phone Number">
+            <textarea id="message" placeholder="Message" rows="4" required></textarea>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="formMsg"></div>
+    </div>
+
+</div>
+
+<!-- Backend Script -->
+<script>
+async function handleQuick(e){
+    e.preventDefault();
+    const payload = {
+        name: document.getElementById('qName').value.trim(),
+        phone: document.getElementById('qPhone').value.trim(),
+        service: document.getElementById('qType').value,
+        message: '',
+        email:''
+    };
+
+    const res = await fetch('/api/submit',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    alert("Submitted! Tracking ID: " + data.id);
+}
+
+async function handleContact(e){
+    e.preventDefault();
+
+    const payload = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        service: "Contact Form",
+        message: document.getElementById('message').value.trim()
+    };
+
+    const res = await fetch('/api/submit',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    document.getElementById('formMsg').innerText = 
+        "Submitted! Tracking ID: " + data.id;
+}
+</script>
+
+</body>
+</html>
